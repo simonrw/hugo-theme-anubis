@@ -10,29 +10,26 @@
 {{ end }}
 
 <script>
-const STORAGE_KEY = 'user-color-scheme'
+const STORAGE_KEY = 'user-theme-setting'
 const defaultTheme = {{ $style }}
 
 let currentTheme
+let currentThemeSetting
 let switchButton
 let autoDefinedScheme = window.matchMedia('(prefers-color-scheme: dark)')
+let usingAutoTheme = false
+let autoListenerAdded = false
 
 const autoChangeScheme = e => {
-    currentTheme = e.matches ? 'dark' : 'light'
-    document.documentElement.setAttribute('data-theme', currentTheme)
-    changeButtonText()
+    if (!usingAutoTheme) {
+        return
+    }
+    applyTheme(e.matches ? 'dark' : 'light')
 }
 
 document.addEventListener('DOMContentLoaded', function() {
     switchButton = document.querySelector('.theme-switcher')
-    currentTheme = detectCurrentScheme()
-    if (currentTheme == 'dark') {
-        document.documentElement.setAttribute('data-theme', 'dark')
-    }
-    if (currentTheme == 'auto') {
-        autoChangeScheme(autoDefinedScheme);
-        autoDefinedScheme.addListener(autoChangeScheme);
-    }
+    applyThemeSetting(detectCurrentScheme())
 
     if (switchButton) {
         changeButtonText()
@@ -43,10 +40,20 @@ document.addEventListener('DOMContentLoaded', function() {
 })
 
 function detectCurrentScheme() {
-    if (localStorage.getItem(STORAGE_KEY)) {
-        return localStorage.getItem(STORAGE_KEY)
+    const storedTheme = localStorage.getItem(STORAGE_KEY)
+    if (isSupportedThemeSetting(storedTheme)) {
+        return storedTheme
     } 
-    if (defaultTheme) {
+    if (defaultTheme == 'auto-without-switcher') {
+        return 'auto'
+    }
+    if (defaultTheme == 'dark-without-switcher') {
+        return 'dark'
+    }
+    if (defaultTheme == 'light-without-switcher') {
+        return 'light'
+    }
+    if (isSupportedThemeSetting(defaultTheme)) {
         return defaultTheme
     } 
     if (!window.matchMedia) {
@@ -58,24 +65,67 @@ function detectCurrentScheme() {
     return 'light'
 }
 
+function isSupportedThemeSetting(themeSetting) {
+    return themeSetting == 'auto' || themeSetting == 'dark' || themeSetting == 'light'
+}
+
+function applyTheme(theme) {
+    currentTheme = theme
+    document.documentElement.setAttribute('data-theme', theme)
+    changeButtonText()
+}
+
+function applyThemeSetting(themeSetting) {
+    currentThemeSetting = themeSetting
+    usingAutoTheme = themeSetting == 'auto'
+    if (usingAutoTheme) {
+        autoChangeScheme(autoDefinedScheme)
+        addAutoListener()
+    } else {
+        applyTheme(themeSetting)
+    }
+}
+
+function addAutoListener() {
+    if (autoListenerAdded) {
+        return
+    }
+    autoListenerAdded = true
+    if (autoDefinedScheme.addEventListener) {
+        autoDefinedScheme.addEventListener('change', autoChangeScheme)
+    } else {
+        autoDefinedScheme.addListener(autoChangeScheme)
+    }
+}
+
+function nextThemeSetting() {
+    if (currentThemeSetting == 'auto') {
+        return 'light'
+    }
+    if (currentThemeSetting == 'light') {
+        return 'dark'
+    }
+    return 'auto'
+}
+
 function changeButtonText()
 {   
     if (switchButton) {
-        switchButton.textContent = currentTheme == 'dark' ?  {{ i18n "lightTheme" }} : {{ i18n "darkTheme" }}
+        const nextTheme = nextThemeSetting()
+        if (nextTheme == 'auto') {
+            switchButton.textContent = {{ i18n "systemTheme" }}
+        } else if (nextTheme == 'dark') {
+            switchButton.textContent = {{ i18n "darkTheme" }}
+        } else {
+            switchButton.textContent = {{ i18n "lightTheme" }}
+        }
     }
 }
 
 function switchTheme(e) {
-    if (currentTheme == 'dark') {
-        localStorage.setItem(STORAGE_KEY, 'light')
-        document.documentElement.setAttribute('data-theme', 'light')
-        currentTheme = 'light'
-    } else {
-        localStorage.setItem(STORAGE_KEY, 'dark')
-        document.documentElement.setAttribute('data-theme', 'dark')
-        currentTheme = 'dark'
-    }
-    changeButtonText()
+    const newThemeSetting = nextThemeSetting()
+    localStorage.setItem(STORAGE_KEY, newThemeSetting)
+    applyThemeSetting(newThemeSetting)
 }
 
 function showContent() {

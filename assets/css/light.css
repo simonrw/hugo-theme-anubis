@@ -1,5 +1,7 @@
 :root {
    /* light.css */ 
+    color-scheme: light;
+
     --font-color: #333;
     --bg-color: #fff;
 

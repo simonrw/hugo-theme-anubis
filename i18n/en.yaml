@@ -43,5 +43,8 @@ darkTheme:
 lightTheme:
   other: "Light theme"
 
+systemTheme:
+  other: "System theme"
+
 readNext:
   other: "Read next"
