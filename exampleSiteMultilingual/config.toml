@@ -1,12 +1,9 @@
 baseURL = "https://example.com"
-languageCode = "en-us"
+locale = "en-us"
 defaultContentLanguage = "en"
 title = "Anubis"
 theme = "anubis"
 paginate = 3
-
-disqusShortname = ""
-googleAnalytics = ""
 
 [author]
 name = "Dmitry Kolosov"

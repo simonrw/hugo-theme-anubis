@@ -16,7 +16,7 @@ Anubis is a simple minimalist theme for [Hugo blog engine](https://gohugo.io/).
 - Mobile support
 - Social icons
 - Google Analytics
-- Comment systems: Disqus, ISSO, Utteranc.es, GraphComment
+- Comment systems: ISSO, Utteranc.es, GraphComment
 - RSS feeds
 - Related posts (Read Next section)
 - Deploy via Netlify (config included in example site)
@@ -63,13 +63,11 @@ If you have toml config (which is by default), you should rename it to config.ya
 
 Example of config.yaml:
 ```yaml
-languageCode: "en-us"
+locale: "en-us"
 baseUrl: ""
 title: "Anubis"
 theme: "anubis"
 paginate: 10
-disqusShortname: "yourdiscussshortname"
-googleAnalytics: "G-12345"
 enableRobotsTXT: true
 
 menu:
